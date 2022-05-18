@@ -99,10 +99,13 @@
       e.preventDefault();
     });
 
-    if (Cookies.get("auth_token") != "null") {
+    if (Cookies.get("auth_token") && Cookies.get("auth_token") != "null") {
+        isUserLoggedIn(()=> {
       window.location.href = "home.html";
+
+        })
     }
-    if (Cookies.get("remember_token") != "null") {
+    if (Cookies.get("remember_token") && Cookies.get("remember_token") != "null") {
       const settings = {
         url: baseUrl + "/login/remember_token",
         method: "POST",
