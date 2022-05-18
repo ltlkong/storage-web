@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <script src="./services.js"></script>
+    <style>
+      html {
+        font-size: 24px;
+      }
+    </style>
+    <title>Storage Service</title>
+  </head>
+  <body style="height: 100vh">
+    <div class="position-fixed end-0">
+      <a href="/" class="">&larr; Main Page</a>
+    </div>
+    <div class="d-flex h-100">
+      <div
+        class="col-md-7 d-none d-md-block overflow-hidden"
+        id="banner-img-container"
+      ></div>
+
+      <div
+        class="col-12 col-md-5 p-5 d- d-flex align-items-center justify-content-center"
+      >
+        <div>
+          <div id="message-bar"></div>
+          <h3>Login:</h3>
+          <form>
+            <div class="mb-3">
+              <label for="email-input" class="form-label">Email address</label>
+              <input
+                type="email"
+                class="form-control"
+                id="email-input"
+                placeholder="name@example.com"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="password-input" class="form-label">Password:</label>
+              <div class="input-group">
+                <input
+                  type="password"
+                  id="password-input"
+                  class="form-control"
+                />
+                <button
+                  class="btn btn-outline-secondary"
+                  id="password-input-visibility"
+                  type="button"
+                >
+                                    &larr;
+                </button>
+              </div>
+            </div>
+            <div class="mb-3">
+              <label for="remember-input" class="form-label"
+                >Stay signed in:</label
+              >
+              <input
+                class="form-check-input"
+                type="checkbox"
+                value=""
+                id="remember-input"
+              />
+            </div>
+            <div>
+              <button class="btn-primary btn" id="login-btn">Login</button>
+              <a class="btn-info btn" href="register.html">
+                Don't have account?
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    $("form").submit((e) => {
+      e.preventDefault();
+    });
+    if (Cookies.get("auth_token") != "null") {
+      window.location.href = "home.html";
+    }
+    if (Cookies.get("remember_token") != "null") {
+      const settings = {
+        url: baseUrl + "/login/remember_token",
+        method: "POST",
+        timeout: 0,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: JSON.stringify({
+          token: Cookies.get("remember_token"),
+        }),
+      };
+
+      const login = $.ajax(settings);
+
+      login.done(function (response) {
+        console.log(response);
+        $("#message-bar").html(
+          `<div class="alert alert-success" role="alert">${response.message}</div>`,
+        );
+
+        Cookies.set("auth_token", response.data.token);
+        window.location.href = "home.html";
+      });
+    }
+
+    $("#login-btn").click(function () {
+      const settings = {
+        url: baseUrl + "/login/account",
+        method: "POST",
+        timeout: 0,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        data: JSON.stringify({
+          email: $("#email-input").val(),
+          password: $("#password-input").val(),
+          remember: $("#remember-input").is(":checked"),
+        }),
+      };
+
+      const login = $.ajax(settings);
+
+      login.done(function (response) {
+        console.log(response);
+        $("#message-bar").html(
+          `<div class="alert alert-success" role="alert">${response.message}</div>`,
+        );
+
+        Cookies.set("auth_token", response.data.token);
+        Cookies.set("remember_token", response.data.remember_token);
+        window.location.href = "home.html";
+      });
+
+      login.fail(function (response) {
+        $("#message-bar").html(`
+       <div class="alert alert-danger" role="alert">${response.responseJSON.message} </div>
+        `);
+      });
+    });
+    $("#banner-img-container").html(`
+        <img
+          class="d-block h-100"
+          src="${baseUrl}/public/file/b1a9a79e-86d6-4c30-b3a9-a6fed258bd5f"
+          alt=""
+          />
+    `);
+
+    $("#password-input-visibility").click(() => {
+      $("#password-input").attr(
+        "type",
+        $("#password-input").attr("type") == "password" ? "text" : "password",
+      );
+    });
+  </script>
+</html>
