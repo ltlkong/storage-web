@@ -58,3 +58,25 @@ function createService(data, success, fail) {
     };
     baseApiCall(settings, success, fail);
 }
+
+function createFileLink(key) {
+    return `${baseUrl}/public/file/${key}`;
+}
+
+function uploadFile(file, apiKey, storage, previousFileKey, success, fail) {
+    const form = new FormData();
+    form.append('file', file);
+    form.append('previous_file_key', previousFileKey);
+
+    const settings = {
+        url: baseUrl + `/file?key=${apiKey}&storage_id=${storage}`,
+        method: 'POST',
+        timeout: 0,
+        processData: false,
+        mimeType: 'multipart/form-data',
+        contentType: false,
+        data: form,
+    };
+
+    baseApiCall(settings, success, fail);
+}

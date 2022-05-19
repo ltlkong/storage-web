@@ -23,10 +23,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
         <script src="./services.js"></script>
+          <style>
+    </style>
     <title>Document</title>
   </head>
   <body style="height: 100vh">
-    <header style="height:15%">
+    <header style="height:7%">
       <div class="container p-2">
         <nav class="d-flex flex-row-reverse">
           <div>
@@ -43,8 +45,12 @@
         </nav>
       </div>
     </header>
-    <main class="d-flex justify-content-center align-items-center h-75">
-      <div style="margin-bottom:15em">
+    <main style="min-height: 90%;">
+            <section class=" w-100
+d-flex justify-content-center align-items-center
+                " id="banner" style="height: 93vh">
+
+      <div style="margin-bottom:12em">
         <h1 class="mb-4">Storage Service</h1>
                 <figcaption class="blockquote-footer">
                     A Simple Storage Api
@@ -53,16 +59,49 @@
   <div class="progress-bar" role="progressbar" id="progress-bar" style="width: 0%"  aria-valuemin="0" aria-valuemax="100"></div>
 </div>
       </div>
+
+            </section>
+
+            <section class="h-25 w-100 border border-primary p-3 d-flex">
+
+                <div class="col-3">
+
+
+                <div>
+
+                Try it here! Upload a file, and click the download button below.
+                </div>
+                <div class="mb-3">
+                  <input class="form-control" type="file" id="test-file">
+                </div>
+                <div id="test-file-btns">
+                    <button class="btn btn-primary"id="upload-btn">Upload</button>
+                </div>
+
+                </div>
+                <div class="col-9 p-1">
+
+                <h4>Preview:</h4>
+                <div id="iframe-container">
+
+                </div>
+                </div>
+            </section>
+
     </main>
-        <footer class="d-flex justify-content-between align-items-center p-4" style="height:10%">
+
+
+
+
+        <footer class="d-flex justify-content-between align-items-center p-4" style="height:7%">
             <div>
-                Created by: <a href="https://tielin-li.netlify.app">Kongi</a>
+                Created by: <a target="_blank" href="https://tielin-li.netlify.app">Kongi</a>
             </div>
             <div id="footer-links">
             </div>
         </footer>
   </body>
-
+    <script src="./constants.js"></script>
   <script>
     isUserLoggedIn((res) => {
       if (res) {
@@ -77,22 +116,51 @@
 
         });
 
-    $("body").css(`background-image`, `url("${baseUrl}/public/file/f0ebf6eb-3a43-4995-aa2d-fcdcf0c5be7c")`);
-    $("body").css({
+    $("#banner").css(`background-image`, `url("${createFileLink(indexPageBackground)}")`);
+    $("#banner").css({
         "background-repeat": "no-repeat",
         "background-position": "center",
         "background-size": "cover"
     });
 
     $('#footer-links').append(`
-                <a target="_blank" href="${baseUrl}/public/file/b451abc2-fdd1-4257-aa49-d335f7b1c851">Terms and Conditions</a>
+<a target="_blank" href="${createFileLink(termLink)}">Terms and Conditions</a>
                 `)
     $('#footer-links').append(`
-                <a target="_blank" href="${baseUrl}/public/file/b451abc2-fdd1-4257-aa49-d335f7b1c851">Documentation</a>
+<a target="_blank" href="${createFileLink(apiDocLink)}">Documentation</a>
                 `)
 
     
     $('#progress-bar').css('width', `${Math.random()*100}%`)
 
+
+    function createIframe() {
+         const styles = `
+
+        width: 100%;
+`;
+        const iframe = `<iframe id="test-iframe" style="${styles}"  src="${createFileLink(testFileLink)}"/>`
+
+        $('#iframe-container').html(iframe)
+    }
+
+    function refreshIframe() {
+        $("#test-iframe").attr('src','')
+        $("#test-iframe").attr('src',createFileLink(testFileLink))
+
+    }
+        createIframe()
+
+    $('#upload-btn').click(()=>{
+    const file = document.getElementById('test-file').files[0];
+        uploadFile(file,testServiceKey, testStorageId, testFileLink, ()=> {
+
+        $('#download-btn').remove()
+        $('#test-file-btns').append(`<a target="_blank" class="btn btn-success" id="download-btn" href="${createFileLink(testFileLink)}">Download</a>`)
+
+            refreshIframe()
+            
+        })
+    })
   </script>
 </html>

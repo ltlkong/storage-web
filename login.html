@@ -94,6 +94,7 @@
       </div>
     </div>
   </body>
+    <script src="./constants.js"></script>
   <script>
     $("form").submit((e) => {
       e.preventDefault();
@@ -168,7 +169,7 @@
     $("#banner-img-container").html(`
         <img
           class="d-block h-100"
-          src="${baseUrl}/public/file/b1a9a79e-86d6-4c30-b3a9-a6fed258bd5f"
+src="${createFileLink(loginPageBanner)}"
           alt=""
           />
     `);
