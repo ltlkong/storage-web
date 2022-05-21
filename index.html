@@ -155,7 +155,9 @@
     createIframe();
 
     $("#upload-btn").click(() => {
-      const file = document.getElementById("test-file").files[0];
+      const fileDom = document.getElementById("test-file");
+      const file = fileDom.files[0];
+
       uploadFile(file, testServiceKey, testStorageId, testFileLink, () => {
         $("#download-btn").remove();
         $("#test-file-btns").append(
@@ -165,6 +167,8 @@
         );
 
         refreshIframe();
+
+        fileDom.value = "";
       });
     });
   </script>

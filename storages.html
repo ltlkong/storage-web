@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <script src="./services.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <a href="/home.html">Go back</a>
+    <div class="position-fixed top-0 end-0 bg-light" style="width: fit-content">
+      <button class="btn btn-primary" id="create-storage-btn">Create</button>
+      <button class="btn btn-warning" id="update-storage-btn">Update</button>
+      <button class="btn btn-danger" id="delete-storage-btn">Delete</button>
+    </div>
+    <section class="p-3" style="margin-bottom: 30vh">
+      <div class="vstack gap-3 mt-3" id="storages-container"></div>
+    </section>
+    <section
+      class="w-100 border border-primary p-3 d-flex position-fixed bottom-0 bg-light"
+    >
+      <div class="col-3">
+        <div id="upload-data"></div>
+        <div class="mb-3">
+          <input class="form-control" type="file" id="test-file" />
+        </div>
+        <div id="files-btn">
+          <button class="btn btn-primary" id="upload-btn">Upload</button>
+        </div>
+      </div>
+      <div class="col-9 p-1">
+        <h4>Preview:</h4>
+        <div id="iframe-container"></div>
+      </div>
+    </section>
+  </body>
+  <script src="./constants.js"></script>
+  <script>
+    let storageId = "";
+
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    getStorages((res) => {
+      const storages = res.data;
+
+      let storagesDom = storages.map((storage) => {
+        return `<div class="bg-light border p-2 d-flex justify-content-between" data-storage-id="${
+          storage.id
+        }">
+            ${storage.name}
+            
+            <a href='files.html?key=${urlParams.get("key")}&storage_id=${
+          storage.id
+        }' class='btn btn-primary'>Show files</a>
+            
+            </div>`;
+      });
+
+      $("#storages-container").html(storagesDom);
+    });
+
+    $("#storages-container").click((e) => {
+      storageId = $(e.target).data("storage-id");
+
+      if (storageId != "" && storageId != null && storageId != undefined) {
+        $("#storages-container div").removeClass("bg-primary");
+        $("#storages-container div").addClass("bg-light");
+
+        $(e.target).toggleClass("bg-light");
+        $(e.target).toggleClass("bg-primary");
+
+        $("#upload-data").text("Storage Id: " + storageId);
+      }
+    });
+
+    function createIframe() {
+      const styles = `width: 100%;`;
+      const iframe = `<iframe id="previous-iframe" style="${styles}"/>`;
+
+      $("#iframe-container").html(iframe);
+    }
+    function refreshIframe(link) {
+      $("#previous-iframe").attr("src", "");
+      $("#previous-iframe").attr("src", createFileLink(link));
+    }
+    createIframe();
+
+    $("#upload-btn").click(() => {
+      const fileDom = document.getElementById("test-file");
+      const file = fileDom.files[0];
+
+      uploadFile(file, urlParams.get("key"), storageId, null, (res) => {
+        $("#download-btn").remove();
+        $("#files-btn").append(
+          `<a target="_blank" class="btn btn-success" id="download-btn" href="${createFileLink(
+            res.data.public_key,
+          )}">Download</a>`,
+        );
+
+        refreshIframe(res.data.public_key);
+        fileDom.value = "";
+      });
+    });
+
+    $("#create-storage-btn").click(() => {
+      let storageName = prompt("Enter storage name");
+
+      const data = {};
+      if (storageName != "") {
+        data.name = storageName;
+      }
+
+      createStorage(data, (res) => {
+        const storage = res.data;
+
+        const storageDom = `<div class="bg-light border p-2 d-flex justify-content-between" data-storage-id="${
+          storage.id
+        }">
+            ${storage.name}
+            
+            <a href='files.html?key=${urlParams.get("key")}&storage_id=${
+          storage.id
+        }' class='btn btn-primary'>Show files</a>
+            
+            </div>`;
+
+        $("#storages-container").append(storageDom);
+      });
+    });
+  </script>
+</html>

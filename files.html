@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2"
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+    <script src="./services.js"></script>
+    <script src="./constants.js"></script>
+    <title>Document</title>
+  </head>
+  <body>
+    <a href="/home.html">Go back</a>
+    <h1>Files:</h1>
+    <div class="position-fixed top-0 end-0 bg-light" style="width: fit-content">
+      <button class="btn btn-primary" id="clear">clear</button>
+      <button class="btn btn-primary" id="status">status</button>
+      <button class="btn btn-warning" id="public_key">public_key</button>
+      <button class="btn btn-danger" id="type">type</button>
+    </div>
+    <div>Current filters: <span id="filters"></span></div>
+    <div
+      class="d-flex flex-wrap m-auto"
+      id="files-container"
+      style="width: 100vw"
+    ></div>
+  </body>
+
+  <script>
+    let files = [];
+    let filterBy = [];
+    let fileStatus = "";
+    let fileType = "";
+    let filePublicKey = "";
+
+    loading();
+    function loading() {
+      $("#files-container").html(`
+      <div
+        class="d-flex justify-content-center align-items-center w-100"
+        style="height: 100vh"
+      >
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+        `);
+    }
+
+    function filePrevious(type, internal_key) {
+      switch (type) {
+        case "image":
+          return `<img src="${createFileLink(
+            internal_key,
+            true,
+          )}" class="card-img-top h-100" style="object-fit: contain;" alt="...">`;
+        case "video":
+          return `<video src="${createFileLink(
+            internal_key,
+            true,
+          )}" class="card-img-top h-100" controls></video>`;
+        default:
+          return `<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/File_alt_font_awesome.svg/1024px-File_alt_font_awesome.svg.png" class="card-img-top h-100" style="object-fit:contain" alt="..." >`;
+      }
+    }
+    function fileDom(name, size, type, status, public_key, internal_key) {
+      const dom = `
+      <div class="col-11 col-sm-6 col-md-4 col-lg-3">
+            <div class="card m-auto mb-2 m-md-3" >
+                <div style="height: 140px">
+                ${filePrevious(type, internal_key)}
+                </div>
+                <div class="card-body">
+                <h5 class="card-title overflow-hidden text-nowrap" style="text-overflow: ellipsis">${name}</h5>
+                <p>Type: ${type}</p>
+                <p>Size: ${size}</p>
+                <p>Status: ${status}</p>
+                <div>
+                    Public key:
+                <p class="bg-secondary">${public_key}</p>
+                </div>
+                <p class='bg-secondary'>Link: ${
+                  status === "active" && createFileLink(public_key)
+                }</p>
+                <a target='_blank' href="${createFileLink(
+                  internal_key,
+                  true,
+                )}" class="btn btn-success">Download</a>
+                </div>
+            </div> 
+            </div>
+          `;
+
+      return dom;
+    }
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+
+    renderFiles();
+    function renderFiles() {
+      $("#filters").text(
+        "status: " +
+          fileStatus +
+          " type: " +
+          fileType +
+          " public_key: " +
+          filePublicKey,
+      );
+      loading();
+      const parmaFileType = filterBy.includes("type") ? fileType : null;
+      const paramFilePublicKey = filterBy.includes("public_key")
+        ? filePublicKey
+        : null;
+      getFileObjects(
+        parmaFileType,
+        paramFilePublicKey,
+        (storageId = urlParams.get("storage_id")),
+        (res) => {
+          const filesContainer = $("#files-container");
+          let filesDoms = "";
+          files = res.data;
+
+          if (filterBy.length > 0) {
+            if (filterBy.includes("status")) {
+              files = files.filter((file) => file.status === fileStatus);
+            }
+          }
+
+          files.forEach((file) => {
+            const { name, size, type, status, public_key, internal_key } = file;
+
+            filesDoms += fileDom(
+              name,
+              size,
+              type,
+              status,
+              public_key,
+              internal_key,
+            );
+          });
+
+          filesContainer.html(filesDoms);
+        },
+      );
+    }
+
+    $("#clear").click(() => {
+      filterBy = [];
+
+      renderFiles();
+    });
+
+    $("#type").click(() => {
+      filterBy.push("type");
+      fileType = prompt("Enter file type");
+      renderFiles();
+    });
+
+    $("#public_key").click(() => {
+      filterBy.push("public_key");
+      filePublicKey = prompt("Enter public key");
+      renderFiles();
+    });
+
+    $("#status").click(() => {
+      filterBy.push("status");
+      fileStatus = fileStatus === "active" ? "disabled" : "active";
+      console.log(fileStatus);
+      renderFiles();
+    });
+  </script>
+</html>
