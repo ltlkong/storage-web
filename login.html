@@ -50,7 +50,18 @@
       >
         <div>
           <div id="message-bar"></div>
-          <h3 class="text-center">Welcome!</h3>
+          <div class="d-flex flex-wrap">
+            <h3 class="text-center mt-2 col-12 order-1 col-md-7 order-md-0">
+              Welcome!
+            </h3>
+            <div class="col-12 order-0 col-md-5 order-md-1">
+              <img
+                src="https://ltl.ngrok.io/public/file/dfa32be3-a002-4345-9ab3-00496c912e11"
+                class="mx-auto d-block"
+                style="height: 3rem"
+              />
+            </div>
+          </div>
           <form>
             <div class="mb-3">
               <label for="email-input" class="form-label">Email:</label>
@@ -159,7 +170,6 @@
       const login = $.ajax(settings);
 
       login.done(function (response) {
-        console.log(response);
         $("#message-bar").html(
           `<div class="alert alert-success" role="alert">${response.message}</div>`,
         );
