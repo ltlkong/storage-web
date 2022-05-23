@@ -40,6 +40,46 @@
     <main class="mt-5">
       <div>Current filters: <span id="filters"></span></div>
       <div class="d-flex flex-wrap" id="files-container"></div>
+
+      <div
+        class="modal fade"
+        id="file-upload-modal"
+        tabindex="-1"
+        aria-labelledby="exampleModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel"></h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                onclick="clearModal()"
+              ></button>
+            </div>
+            <div class="modal-body d-flex">
+              <div class="col-3">
+                <div id="upload-data"></div>
+                <div class="mb-3">
+                  <input class="form-control" type="file" id="test-file" />
+                </div>
+              </div>
+              <div class="col-9 p-1">
+                <h4>Preview:</h4>
+                <div id="iframe-container"></div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <div id="files-btn">
+                <button class="btn btn-primary" id="upload-btn">Upload</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
   </body>
 
@@ -49,11 +89,12 @@
     let fileStatus = "active";
     let fileType = "";
     let filePublicKey = "";
+    let selectedPublicKey = "";
 
-    loading();
+    loading("#files-container");
 
-    function loading() {
-      $("#files-container").html(`
+    function loading(element) {
+      $(element).html(`
       <div
         class="d-flex justify-content-center align-items-center w-100"
         style="height: 100vh"
@@ -102,12 +143,12 @@
                     ? `
                 <div class='d-flex'>
                     <p class='text-nowrap pe-1'>Public key:</p>
-                    <p class="bg-secondary overflow-scroll text-nowrap">${public_key}</p>
+                    <p class="bg-secondary overflow-scroll text-nowrap public-key">${public_key}</p>
                 </div>
 `
                     : ""
                 }
-                <button class='btn btn-primary w-100 mb-2'>Add Version</button>
+                <button class='btn btn-primary w-100 mb-2 add-version-btn' onclick='addVersionBtnClick(event)'>Add Version</button>
                 <a target='_blank' href="${createFileLink(
                   internal_key,
                   true,
@@ -132,7 +173,7 @@
           " public_key: " +
           filePublicKey,
       );
-      loading();
+      loading("#files-container");
       const parmaFileType = filterBy.includes("type") ? fileType : null;
       const paramFilePublicKey = filterBy.includes("public_key")
         ? filePublicKey
@@ -193,6 +234,64 @@
       fileStatus = fileStatus === "active" ? "disabled" : "active";
       console.log(fileStatus);
       renderFiles();
+    });
+
+    function fileUploadModal() {
+      $("#file-upload-modal").modal("show");
+    }
+
+    function addVersionBtnClick(event) {
+      const publicKey = $(event.target)
+        .closest(".card")
+        .find(".public-key")
+        .text();
+
+      selectedPublicKey = publicKey;
+
+      $("#file-upload-modal h5").text("For: " + selectedPublicKey);
+      fileUploadModal();
+    }
+
+    function createIframe() {
+      const styles = `width: 100%;`;
+      const iframe = `<iframe id="previous-iframe" style="${styles}"/>`;
+
+      $("#iframe-container").html(iframe);
+    }
+    function refreshIframe(link) {
+      $("#previous-iframe").attr("src", "");
+      $("#previous-iframe").attr("src", createFileLink(link));
+    }
+
+    function clearModal() {
+      $("#download-btn").remove();
+      $("iframe").remove();
+    }
+
+    $("#upload-btn").click(() => {
+      const fileDom = document.getElementById("test-file");
+      const file = fileDom.files[0];
+
+      loading("#iframe-container");
+      uploadFile(
+        file,
+        urlParams.get("key"),
+        urlParams.get("storage_id"),
+        selectedPublicKey,
+        (res) => {
+          $("#download-btn").remove();
+          $("#files-btn").append(
+            `<a target="_blank" class="btn btn-success" id="download-btn" href="${createFileLink(
+              res.data.public_key,
+            )}">Download</a>`,
+          );
+
+          createIframe();
+          refreshIframe(res.data.public_key);
+          fileDom.value = "";
+          renderFiles();
+        },
+      );
     });
   </script>
 </html>
