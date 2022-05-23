@@ -28,29 +28,30 @@
   </head>
   <body>
     <a href="/home.html">Go back</a>
-    <h1>Files:</h1>
-    <div class="position-fixed top-0 end-0 bg-light" style="width: fit-content">
+    <div
+      class="position-fixed top-0 end-0"
+      style="width: fit-content; z-index: 1"
+    >
       <button class="btn btn-primary" id="clear">clear</button>
       <button class="btn btn-primary" id="status">status</button>
       <button class="btn btn-warning" id="public_key">public_key</button>
       <button class="btn btn-danger" id="type">type</button>
     </div>
-    <div>Current filters: <span id="filters"></span></div>
-    <div
-      class="d-flex flex-wrap m-auto"
-      id="files-container"
-      style="width: 100vw"
-    ></div>
+    <main class="mt-5">
+      <div>Current filters: <span id="filters"></span></div>
+      <div class="d-flex flex-wrap" id="files-container"></div>
+    </main>
   </body>
 
   <script>
     let files = [];
-    let filterBy = [];
-    let fileStatus = "";
+    let filterBy = ["status"];
+    let fileStatus = "active";
     let fileType = "";
     let filePublicKey = "";
 
     loading();
+
     function loading() {
       $("#files-container").html(`
       <div
@@ -82,27 +83,35 @@
     }
     function fileDom(name, size, type, status, public_key, internal_key) {
       const dom = `
-      <div class="col-11 col-sm-6 col-md-4 col-lg-3">
+      <div class="col-11 col-sm-6 col-md-4 col-lg-3 mx-auto position-relative mx-md-0" style="z-index: 0;">
             <div class="card m-auto mb-2 m-md-3" >
                 <div style="height: 140px">
                 ${filePrevious(type, internal_key)}
                 </div>
                 <div class="card-body">
-                <h5 class="card-title overflow-hidden text-nowrap" style="text-overflow: ellipsis">${name}</h5>
+                <h5 class="card-title overflow-hidden text-nowrap text-truncate border border-primary p-1" >${name}</h5>
                 <p>Type: ${type}</p>
                 <p>Size: ${size}</p>
-                <p>Status: ${status}</p>
-                <div>
-                    Public key:
-                <p class="bg-secondary">${public_key}</p>
-                </div>
-                <p class='bg-secondary'>Link: ${
-                  status === "active" && createFileLink(public_key)
+                <p>Status: ${
+                  status === "disabled"
+                    ? `<span class="badge bg-danger">disabled</span>`
+                    : `<span class="badge bg-success">${status}</span>`
                 }</p>
+                ${
+                  status === "active"
+                    ? `
+                <div class='d-flex'>
+                    <p class='text-nowrap pe-1'>Public key:</p>
+                    <p class="bg-secondary overflow-scroll text-nowrap">${public_key}</p>
+                </div>
+`
+                    : ""
+                }
+                <button class='btn btn-primary w-100 mb-2'>Add Version</button>
                 <a target='_blank' href="${createFileLink(
                   internal_key,
                   true,
-                )}" class="btn btn-success">Download</a>
+                )}" class="btn btn-success w-100">Download</a>
                 </div>
             </div> 
             </div>

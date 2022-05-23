@@ -60,25 +60,29 @@
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
 
-    getStorages((res) => {
-      const storages = res.data;
+    refreshStorages();
 
-      let storagesDom = storages.map((storage) => {
-        return `<div class="bg-light border p-2 d-flex justify-content-between" data-storage-id="${
-          storage.id
-        }">
+    function refreshStorages() {
+      getStorages((res) => {
+        const storages = res.data;
+
+        let storagesDom = storages.map((storage) => {
+          return `<div class="bg-light border p-2 d-flex justify-content-between" data-storage-id="${
+            storage.id
+          }">
+          <span class="w-25 overflow-hidden text-truncate">
             ${storage.name}
-            
-            <div>Files: ${storage.files_count}</div>
+            </span>
+            <span>Files: ${storage.files_count}</span>
             <a href='files.html?key=${urlParams.get("key")}&storage_id=${
-          storage.id
-        }' class='btn btn-primary'>Show files</a>
-            
+            storage.id
+          }' class='btn btn-success'>Show files</a>
             </div>`;
-      });
+        });
 
-      $("#storages-container").html(storagesDom);
-    });
+        $("#storages-container").html(storagesDom);
+      });
+    }
 
     $("#storages-container").click((e) => {
       storageId = $(e.target).data("storage-id");
@@ -104,12 +108,12 @@
       $("#previous-iframe").attr("src", "");
       $("#previous-iframe").attr("src", createFileLink(link));
     }
-    createIframe();
 
     $("#upload-btn").click(() => {
       const fileDom = document.getElementById("test-file");
       const file = fileDom.files[0];
 
+      loading("#iframe-container");
       uploadFile(file, urlParams.get("key"), storageId, null, (res) => {
         $("#download-btn").remove();
         $("#files-btn").append(
@@ -118,7 +122,9 @@
           )}">Download</a>`,
         );
 
+        createIframe();
         refreshIframe(res.data.public_key);
+        refreshStorages();
         fileDom.value = "";
       });
     });
@@ -133,22 +139,20 @@
 
       createStorage(data, (res) => {
         const storage = res.data;
-
-        const storageDom = `<div class="bg-light border p-2 d-flex justify-content-between" data-storage-id="${
-          storage.id
-        }">
-            ${storage.name}
-            
-
-            <div>Files: ${storage.files_count}</div>
-            <a href='files.html?key=${urlParams.get("key")}&storage_id=${
-          storage.id
-        }' class='btn btn-primary'>Show files</a>
-            
-            </div>`;
-
-        $("#storages-container").append(storageDom);
+        refreshStorages();
       });
     });
+
+    function loading(element) {
+      $(element).html(`
+      <div
+        class="d-flex justify-content-center align-items-center w-100 h-100"
+      >
+        <div class="spinner-border" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+        `);
+    }
   </script>
 </html>

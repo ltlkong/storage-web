@@ -23,25 +23,31 @@
         <div>
           <h1><a href="/index.html">Storage Service</a></h1>
         </div>
-        <div class="p-3">
-          Hi <mark id="email"></mark>
-          <button id="logoff-btn" class="btn btn-outline-warning">
-            Log off
-          </button>
+        <div class="p-3 d-flex col-7 col-xl-5 flex-wrap">
+          <div
+            class="col-12 col-lg-6 lh-lg text-center p-1 overflow-hidden text-truncate"
+          >
+            Hi <mark id="email"></mark>
+          </div>
+          <div class="col-12 col-lg-6">
+            <button id="logoff-btn" class="btn btn-outline-warning w-100">
+              Log off
+            </button>
+          </div>
         </div>
       </div>
     </header>
     <main>
       <div class="m-2 d-flex flex-wrap">
-        <div class="col-md-6 p-2">
+        <div class="col-md-6 p-2 mx-auto">
           <div id="message-bar"></div>
           <form>
             <div class="mb-3">
-              <label for="service-name" class="form-label">Service Name</label>
+              <label for="service-name" class="form-label">Service Name:</label>
               <input type="text" class="form-control" id="service-name" />
 
               <label for="service-description" class="form-label"
-                >Service Description</label
+                >Service Description:</label
               >
               <div>
                 <textarea
@@ -54,14 +60,14 @@
 
             <button
               type="submit"
-              class="btn btn-primary"
+              class="btn btn-primary w-100"
               id="create-new-service-btn"
             >
               Create
             </button>
           </form>
         </div>
-        <div id="services-container" class="col-md-6"></div>
+        <div id="services-container" class="col-md-6 mx-auto"></div>
       </div>
     </main>
   </body>
